@@ -2,6 +2,7 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const _ = require('lodash');
 const ejs = require("ejs");
 
 const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
@@ -12,12 +13,50 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+const composes = [];
 
+app.get("/", function(req, res) {
+    res.render("home", { startingContent: homeStartingContent });
+});
 
+app.get("/blogs", function(req, res) {
+    res.render("blogs", { content: composes });
+});
 
+app.get("/blogs/:blogTitle", function(req, res) {
+    title = _.lowerCase(req.params.blogTitle);
+    var selectedBlog = {};
+    composes.forEach(function(blog) {
+        if (_.lowerCase(blog.title) === title) {
+            selectedBlog = blog;
+        }
+    })
+    res.render("post", { blog: selectedBlog });
+});
+
+app.get("/about", function(req, res) {
+    res.render("about", { content: aboutContent });
+});
+
+app.get("/contact", function(req, res) {
+    res.render("contact", { content: contactContent });
+});
+
+app.get("/compose", function(req, res) {
+    res.render("compose");
+});
+
+app.post("/compose", function(req, res) {
+    const compose = {
+        title: req.body.newComposeTitle,
+        post: req.body.newComposePost
+    };
+    composes.push(compose);
+    res.redirect("/");
+});
 
 
 
@@ -29,5 +68,5 @@ app.use(express.static("public"));
 
 
 app.listen(3000, function() {
-  console.log("Server started on port 3000");
+    console.log("Server started on port 3000");
 });
